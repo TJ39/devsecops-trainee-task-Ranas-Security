@@ -2,17 +2,20 @@ name: Log Checker
 
 on:
   push:
+    branches: [ master ]
   pull_request:
+    branches: [ master ]
 
 jobs:
   run-log-checker:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Make script executable
         run: chmod +x log_checker.sh
 
       - name: Run log checker
         run: ./log_checker.sh sample.log
+
