@@ -1,0 +1,14 @@
+2025-12-03 08:10:12 [INFO] Starting service...
+2025-12-03 08:10:13 [INFO] Configuration loaded successfully.
+2025-12-03 08:10:15 [DEBUG] Health check OK.
+2025-12-03 08:10:18 [INFO] Worker thread started.
+
+2025-12-03 08:11:01 [WARNING] Disk usage at 72% — monitoring.
+2025-12-03 08:11:10 [DEBUG] Cache cleanup completed.
+2025-12-03 08:11:25 [INFO] Processing request ID=55213
+2025-12-03 08:11:26 [INFO] Request completed successfully.
+
+2025-12-03 08:12:00 [WARNING] High latency detected on API call: 890ms
+2025-12-03 08:12:15 [DEBUG] Heartbeat OK.
+2025-12-03 08:12:55 [INFO] System running normally.
+
