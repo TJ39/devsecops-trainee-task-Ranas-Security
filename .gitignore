@@ -1,0 +1,20 @@
+# Swap files
+*.swp
+*.swo
+
+# Temporary files
+*.tmp
+*.log
+
+# Allow sample.log to stay
+!sample.log
+
+# Python cache
+__pycache__/
+*.pyc
+
+# OS files
+.DS_Store
+
+# Backup files
+*~
