@@ -102,3 +102,10 @@ It:
 - Fails if the script exits with a non-zero status
 
 This ensures automated static log checking.
+
+# CI: Log Checker
+This repository includes a GitHub Actions workflow that:
+- runs log_checker.sh sample.log on every push and PR,
+- fails (red) if ERROR appears in the log,
+- passes (green) otherwise.
+
