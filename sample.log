@@ -1,3 +1,12 @@
-all good
-this is an error event
-trigger
+INFO: Starting application...
+INFO: Checking configuration
+WARN: Disk space is below threshold (15%)
+INFO: Initialization complete
+
+ERROR: Failed to connect to database
+WARN: Retrying connection in 5 seconds
+INFO: Attempting reconnect...
+
+ERROR: Connection timed out
+INFO: Shutting down service gracefully
+
