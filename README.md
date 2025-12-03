@@ -109,3 +109,40 @@ This repository includes a GitHub Actions workflow that:
 - fails (red) if ERROR appears in the log,
 - passes (green) otherwise.
 
+
+#Task 5 — Automated Meta-Testing (Self-Validation of the CI System)
+
+This repository includes a meta-testing mechanism that automatically verifies whether the main CI log-checking workflow behaves correctly.
+It ensures that:
+
+A clean log correctly results in a CI Pass, and
+
+An error log correctly results in a CI Fail.
+
+This removes the need for manual testing (e.g., echo "trigger"), and makes the  DevSecOps pipeline behave  with self-validation built in.
+
+📄 test_workflow.sh — Meta-Test Script
+
+This script generates two test logs and checks whether the log_checker.py tool returns the correct exit codes.
+
+#How It Works
+
+Creates sample_clean.log → contains no error keywords
+
+Expected result: log checker returns success
+
+Creates sample_error.log → contains simulated error text
+
+Expected result: log checker returns failure
+
+If either behavior is incorrect, the script exits with code 1, causing the CI to fail.
+
+#.github/workflows/test-the-test.yml — Automated Meta-Test Workflow
+
+This GitHub Action runs the test_workflow.sh script on every push or pull request, ensuring the log checker is always functioning correctly.
+What This Meta-Testing Proves
+Scenario	Expected Result	Validates
+sample_clean.log contains no errors	CI passes	Log checker correctly ignores clean logs
+sample_error.log contains "ERROR"	CI fails	Log checker correctly detects real issues
+
+This provides CI robustness and ensures the  DevSecOps pipeline behaves predictably without manual intervention.
