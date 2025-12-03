@@ -4,82 +4,77 @@
 # Log Checker Script
 # ===========================
 
+# Function to check a logfile
 check_log() {
     local LOGFILE="$1"
 
-    # Check file exists
+    # File must exist
     if [ ! -f "$LOGFILE" ]; then
-        echo "Error: File '$LOGFILE' does not exist."
+        echo "Error: Log file '$LOGFILE' does not exist."
         return 2
     fi
 
-    # STATIC MODE COUNTS (force grep exit code to 0)
-    ERROR_COUNT=$(grep -c "ERROR" "$LOGFILE" 2>/dev/null)
-    WARN_COUNT=$(grep -c "WARN" "$LOGFILE" 2>/dev/null)
-    INFO_COUNT=$(grep -c "INFO" "$LOGFILE" 2>/dev/null)
+    # Get counts (grep -c ALWAYS outputs one number)
+    ERROR_COUNT=$(grep -c "ERROR" "$LOGFILE")
+    WARN_COUNT=$(grep -c "WARN" "$LOGFILE")
+    INFO_COUNT=$(grep -c "INFO" "$LOGFILE")
 
-    echo "===== Log Summary ====="
     echo "ERROR lines: $ERROR_COUNT"
     echo "WARN lines:  $WARN_COUNT"
     echo "INFO lines:  $INFO_COUNT"
-    echo "========================"
 
-    # EXIT CODES
+    # Any errors → return 1
     if [ "$ERROR_COUNT" -gt 0 ]; then
-        return 1   # fail
-    else
-        return 0   # pass
+        return 1
     fi
+
+    # No errors → return 0
+    return 0
 }
 
 # ===========================
-# Integration Test Mode
+# Self-test (used in CI)
 # ===========================
-run_tests() {
-    echo "Running integration tests..."
+if [ "$1" == "--self-test" ]; then
+    echo "[SELF-TEST] Running internal tests..."
 
-    # Test 1: Bad log (should fail)
-    BAD_LOG=$(mktemp)
-    echo "ERROR: something went wrong" > "$BAD_LOG"
-    check_log "$BAD_LOG"
-    result=$?
-    if [ $result -ne 1 ]; then
-        echo "Test failed: checker passed on bad log (exit=$result)"
-        rm -f "$BAD_LOG"
-        exit 1
-    else
-        echo "Bad log test passed"
-    fi
-    rm -f "$BAD_LOG"
+    # Create a temporary good log
+    GOOD_LOG="good.log"
+    echo "INFO: Everything OK" > "$GOOD_LOG"
 
-    # Test 2: Good log (should pass)
-    GOOD_LOG=$(mktemp)
-    echo "INFO: all systems normal" > "$GOOD_LOG"
+    # Should PASS
     check_log "$GOOD_LOG"
-    result=$?
-    if [ $result -ne 0 ]; then
-        echo "Test failed: checker failed on good log (exit=$result)"
+    if [ $? -ne 0 ]; then
+        echo "[SELF-TEST] FAIL: Good log was expected to pass."
         rm -f "$GOOD_LOG"
         exit 1
-    else
-        echo "Good log test passed"
     fi
-    rm -f "$GOOD_LOG"
 
-    echo "All tests passed"
+    # Create a bad log
+    BAD_LOG="bad.log"
+    echo "ERROR: Something bad happened" > "$BAD_LOG"
+
+    # Should FAIL
+    check_log "$BAD_LOG"
+    if [ $? -eq 0 ]; then
+        echo "[SELF-TEST] FAIL: Bad log was expected to fail."
+        rm -f "$GOOD_LOG" "$BAD_LOG"
+        exit 1
+    fi
+
+    echo "[SELF-TEST] PASS"
+    rm -f "$GOOD_LOG" "$BAD_LOG"
     exit 0
-}
+fi
 
 # ===========================
-# Main Logic
+# Normal script execution
 # ===========================
-if [ "$1" == "self-test" ]; then
-    run_tests
-elif [ $# -ne 1 ]; then
-    echo "Usage: $0 <logfile> | self-test"
+if [ -z "$1" ]; then
+    echo "Usage: $0 <logfile> or $0 --self-test"
     exit 2
-else
-    check_log "$1"
-    exit $?
 fi
+
+check_log "$1"
+exit $?
 
