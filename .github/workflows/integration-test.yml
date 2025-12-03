@@ -1,0 +1,18 @@
+name: Integration Test
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  integration-test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Run integration self-test
+        run: |
+          chmod +x log_checker.sh
+          ./log_checker.sh self-test
