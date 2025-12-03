@@ -1,0 +1,18 @@
+name: Test the Test
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  validate-log-checker:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Run the meta-test script
+        run: |
+          chmod +x test_workflow.sh
+          ./test_workflow.sh
