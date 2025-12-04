@@ -1,5 +1,5 @@
 #!/bin/bash
-
+set -euo pipefail
 # ===========================
 # Log Checker Script
 # ===========================
@@ -86,4 +86,5 @@ else
     check_log "$1"
     exit $?
 fi
+
 
