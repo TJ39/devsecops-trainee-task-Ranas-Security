@@ -1,5 +1,6 @@
 #!/bin/bash
 set -euo pipefail
+
 # ===========================
 # Log Checker Script
 # ===========================
@@ -13,10 +14,15 @@ check_log() {
         return 2
     fi
 
-    # Safe counts — prevents "0\n0" errors
-    ERROR_COUNT=$(grep -c "ERROR" "$LOGFILE" 2>/dev/null || echo 0)
-    WARN_COUNT=$(grep -c "WARN" "$LOGFILE" 2>/dev/null || echo 0)
-    INFO_COUNT=$(grep -c "INFO" "$LOGFILE" 2>/dev/null || echo 0)
+    # Count log entries safely (works with set -e)
+    ERROR_COUNT=$( { grep -c "ERROR" "$LOGFILE" 2>/dev/null || true; } )
+    WARN_COUNT=$( { grep -c "WARN" "$LOGFILE" 2>/dev/null || true; } )
+    INFO_COUNT=$( { grep -c "INFO" "$LOGFILE" 2>/dev/null || true; } )
+
+    # Normalize values (avoids empty output → integer errors)
+    ERROR_COUNT="${ERROR_COUNT:-0}"
+    WARN_COUNT="${WARN_COUNT:-0}"
+    INFO_COUNT="${INFO_COUNT:-0}"
 
     echo "===== Log Summary ====="
     echo "ERROR lines: $ERROR_COUNT"
@@ -35,18 +41,16 @@ check_log() {
 # ===========================
 # Integration Test Mode
 # ===========================
+
 run_tests() {
     echo "Running integration tests..."
 
-    # Test 1: Bad log (should fail)
+    # Test 1: Bad log (should FAIL)
     BAD_LOG=$(mktemp)
-    echo "ERROR: something broke" > "$BAD_LOG"
+    echo "ERROR: Something bad happened" > "$BAD_LOG"
 
-    check_log "$BAD_LOG"
-    result=$?
-
-    if [ $result -ne 1 ]; then
-        echo "❌ Test failed: bad log did NOT return exit 1"
+    if check_log "$BAD_LOG"; then
+        echo "❌ Test failed: bad log should return exit 1"
         rm -f "$BAD_LOG"
         exit 1
     else
@@ -54,15 +58,12 @@ run_tests() {
     fi
     rm -f "$BAD_LOG"
 
-    # Test 2: Good log (should pass)
+    # Test 2: Good log (should PASS)
     GOOD_LOG=$(mktemp)
-    echo "INFO: all good" > "$GOOD_LOG"
+    echo "INFO: everything OK" > "$GOOD_LOG"
 
-    check_log "$GOOD_LOG"
-    result=$?
-
-    if [ $result -ne 0 ]; then
-        echo "❌ Test failed: good log did NOT return exit 0"
+    if ! check_log "$GOOD_LOG"; then
+        echo "❌ Test failed: good log should return exit 0"
         rm -f "$GOOD_LOG"
         exit 1
     else
@@ -77,7 +78,8 @@ run_tests() {
 # ===========================
 # Main Logic
 # ===========================
-if [ "$1" == "self-test" ]; then
+
+if [ "${1:-}" = "self-test" ]; then
     run_tests
 elif [ $# -ne 1 ]; then
     echo "Usage: $0 <logfile> | self-test"
@@ -86,5 +88,3 @@ else
     check_log "$1"
     exit $?
 fi
-
-
