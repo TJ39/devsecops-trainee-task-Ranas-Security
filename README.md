@@ -137,7 +137,7 @@ Expected result: log checker returns failure
 
 If either behavior is incorrect, the script exits with code 1, causing the CI to fail.
 
-#.github/workflows/test-the-test.yml — Automated Meta-Test Workflow
+###.github/workflows/test-the-test.yml — Automated Meta-Test Workflow
 
 This GitHub Action runs the test_workflow.sh script on every push or pull request, ensuring the log checker is always functioning correctly.
 What This Meta-Testing Proves
@@ -146,3 +146,33 @@ sample_clean.log contains no errors	CI passes	Log checker correctly ignores clea
 sample_error.log contains "ERROR"	CI fails	Log checker correctly detects real issues
 
 This provides CI robustness and ensures the  DevSecOps pipeline behaves predictably without manual intervention.
+
+###Self-Test Mode (Integration Test)
+
+The log checker includes a built-in self-test that validates its own behavior without requiring manual creation of test logs.
+
+**How to run the self-test**
+./log_checker.sh self-test
+
+**What it verifies**
+
+The self-test automatically performs two checks:
+
+-Bad log case (expected to fail with exit code 1)
+
+-Creates a temporary log file containing an ERROR line
+
+-Ensures the log checker exits with 1 (failure)
+
+-Good log case (expected to pass with exit code 0)
+
+-Creates a temporary log file with only INFO lines
+
+-Ensures the log checker exits with 0 (success)
+
+If both conditions are correctly validated, the script prints:
+
+All tests passed
+
+
+This is used in CI to verify that the tool works correctly on both clean and failing logs.
