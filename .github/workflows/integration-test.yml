@@ -1,18 +1,27 @@
-name: Integration Test
+name: Integration Test (Explicit)
 
 on:
   push:
+    branches: [ master ]
   pull_request:
+    branches: [ master ]
 
 jobs:
-  integration-test:
+  run-self-test:
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
-      - name: Run integration self-test
+      - name: Make log_checker executable
+        run: chmod +x log_checker.sh
+
+      - name: Run self-test (expected behaviour)
         run: |
-          chmod +x log_checker.sh
+          echo "=== Running log_checker self-test ==="
+          echo "This validates:"
+          echo "  • Bad log → checker must exit with 1 (CI should detect failure)"
+          echo "  • Good log → checker must exit with 0 (CI should pass)"
+          echo ""
           ./log_checker.sh self-test
