@@ -1,0 +1,90 @@
+COMMAND: kubectl get pods
+No resources found in tafadzwa-dev namespace.
+ACCESS: Pods listed successfully (access granted in namespace)
+----------------------------------------
+COMMAND: kubectl get ns
+Error from server (Forbidden): namespaces is forbidden: User "system:serviceaccount:tafadzwa-dev:tafadzwa" cannot list resource "namespaces" in API group "" at the cluster scope
+ACCESS: Forbidden (access limited to own namespace)
+----------------------------------------
+COMMAND: kubectl auth can-i '*' '*'
+yes
+ACCESS: Limited (cannot perform cluster-wide operations)
+----------------------------------------
+COMMAND: kubectl create deploy web --image=nginx:alpine
+deployment.apps/web created
+ACCESS: Deployment created (namespace access granted)
+----------------------------------------
+COMMAND: kubectl expose deploy web --port=80 --target-port=80
+service/web exposed
+ACCESS: Service created successfully
+----------------------------------------
+COMMAND: kubectl get deploy,rs,pods,svc -o wide
+NAME                  READY   UP-TO-DATE   AVAILABLE   AGE     CONTAINERS   IMAGES         SELECTOR
+deployment.apps/web   0/1     1            0           2m37s   nginx        nginx:alpine   app=web
+
+NAME                             DESIRED   CURRENT   READY   AGE     CONTAINERS   IMAGES         SELECTOR
+replicaset.apps/web-5bd64f6ccb   1         1         0       2m37s   nginx        nginx:alpine   app=web,pod-template-hash=5bd64f6ccb
+
+NAME                       READY   STATUS    RESTARTS   AGE     IP       NODE     NOMINATED NODE   READINESS GATES
+pod/web-5bd64f6ccb-6xpzg   0/1     Pending   0          2m37s   <none>   <none>   <none>           <none>
+
+NAME          TYPE        CLUSTER-IP      EXTERNAL-IP   PORT(S)   AGE   SELECTOR
+service/web   ClusterIP   10.101.59.133   <none>        80/TCP    58s   app=web
+ACCESS: Deployment, pods, service overview
+----------------------------------------
+COMMAND: kubectl describe pod -l app=web
+Name:             web-5bd64f6ccb-6xpzg
+Namespace:        tafadzwa-dev
+Priority:         0
+Service Account:  default
+Node:             <none>
+Labels:           app=web
+                  pod-template-hash=5bd64f6ccb
+Annotations:      <none>
+Status:           Pending
+IP:               
+IPs:              <none>
+Controlled By:    ReplicaSet/web-5bd64f6ccb
+Containers:
+  nginx:
+    Image:        nginx:alpine
+    Port:         <none>
+    Host Port:    <none>
+    Environment:  <none>
+    Mounts:
+      /var/run/secrets/kubernetes.io/serviceaccount from kube-api-access-s87xn (ro)
+Conditions:
+  Type           Status
+  PodScheduled   False 
+Volumes:
+  kube-api-access-s87xn:
+    Type:                    Projected (a volume that contains injected data from multiple sources)
+    TokenExpirationSeconds:  3607
+    ConfigMapName:           kube-root-ca.crt
+    Optional:                false
+    DownwardAPI:             true
+QoS Class:                   BestEffort
+Node-Selectors:              <none>
+Tolerations:                 node.kubernetes.io/not-ready:NoExecute op=Exists for 300s
+                             node.kubernetes.io/unreachable:NoExecute op=Exists for 300s
+Events:
+  Type     Reason             Age                   From                Message
+  ----     ------             ----                  ----                -------
+  Warning  FailedScheduling   4m12s                 default-scheduler   no nodes available to schedule pods
+  Warning  FailedScheduling   4m8s (x2 over 4m11s)  default-scheduler   no nodes available to schedule pods
+  Normal   NotTriggerScaleUp  4m11s                 cluster-autoscaler  pod didn't trigger scale-up:
+ACCESS: Pod details collected
+----------------------------------------
+COMMAND: kubectl get events --sort-by=.lastTimestamp | tail -n 50
+LAST SEEN   TYPE      REASON              OBJECT                      MESSAGE
+4m37s       Warning   FailedScheduling    pod/web-5bd64f6ccb-6xpzg    no nodes available to schedule pods
+4m33s       Warning   FailedScheduling    pod/web-5bd64f6ccb-6xpzg    no nodes available to schedule pods
+4m38s       Normal    SuccessfulCreate    replicaset/web-5bd64f6ccb   Created pod: web-5bd64f6ccb-6xpzg
+4m38s       Normal    ScalingReplicaSet   deployment/web              Scaled up replica set web-5bd64f6ccb from 0 to 1
+4m36s       Normal    NotTriggerScaleUp   pod/web-5bd64f6ccb-6xpzg    pod didn't trigger scale-up:
+ACCESS: Last 50 events collected (useful for Pending reason)
+----------------------------------------
+----------------------------------------
+COMMAND: kubectl get nodes
+ACCESS: Forbidden
+----------------------------
