@@ -176,3 +176,94 @@ All tests passed
 
 
 This is used in CI to verify that the tool works correctly on both clean and failing logs.
+
+
+# EVENT BASE: KUBERNETES ACCESS CHECK & PENDING WORKLOAD ANALYSIS
+
+**Environment:** tafadzwa-dev  
+**Scope:** Namespace-restricted access  
+**Platform:** Kubernetes  
+**Client:** kubectl on Alpine Linux (WSL)
+
+---
+
+## Objective
+
+The purpose of this task was to validate Kubernetes access boundaries, deploy a test workload within an assigned namespace, and investigate why the workload remained in a Pending state. This simulates a real-world DevSecOps incident investigation under restricted RBAC permissions.
+
+---
+
+## Access Boundary Validation
+
+### Command Ran
+kubectl get pods
+kubectl get ns
+kubectl can-i '*' '*'
+
+kubectl create deploy web --image=nginx:alpine
+kubectl expose deploy web --port 80 --target-port 80
+kubectl get deploy,rs,pods,svc -o wide
+
+kubectl describe pod -l app=web
+kubectl get events --sort-by=.lastTimestamp | tail -n 50
+
+###REPORT
+
+### Key Observations
+- Scheduler unable to place pod on any node
+- Events indicate lack of schedulable resources or nodes
+
+---
+
+## Likely Root Cause
+
+Access to nodes was forbidden but, the most likely root cause is the absence of available schedulable nodes. This may be due to:
+
+- Node group scaled to zero
+- Cluster autoscaler disabled or misconfigured
+- Insufficient CPU or memory
+- Namespace resource quota restrictions
+-Scheduler attempted to place the pod but no nodes were available to schedule it
+
+-Pod creation succeeded, but it could not start due to insufficient node resources or no matching nodes
+
+-Event log shows repeated FailedScheduling warnings and a NotTriggerScaleUp notice
+
+---
+
+## What I Would Check Next (With Cluster-Admin Access)
+
+- Node availability and readiness
+- Allocatable vs requested resources
+- Cluster autoscaler configuration and logs
+- Node group minimum size
+- Namespace resource quotas
+
+---
+
+## Mitigation Options
+
+- Increase node group minimum size
+- Enable or fix cluster autoscaler
+- Add capacity or larger instance types
+- Adjust namespace resource quotas
+- Review scheduling constraints and taints
+
+---
+
+## Security & Constraints
+
+- No cluster-wide resources accessed
+- No sensitive information exposed
+- RBAC boundaries respected throughout the task
+
+---
+
+## Definition of Done
+
+- Deployment and Service created in tafadzwa-dev namespace
+- Access boundaries validated
+- Evidence collected and attached
+- Root cause identified
+- Mitigation options documented
+
