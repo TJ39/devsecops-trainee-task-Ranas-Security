@@ -18,3 +18,8 @@ __pycache__/
 
 # Backup files
 *~
+
+.kube/
+*.token
+*.key
+*.crt
