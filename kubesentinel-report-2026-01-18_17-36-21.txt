@@ -1,0 +1,45 @@
+KUBESENTINEL REPORT
+Generated: Sun Jan 18 17:36:21 UTC 2026
+Namespace: tafadzwa-dev
+==================================
+Current Context: tafadzwa-dev
+Worker Nodes Detected: 0
+RBAC CHECKS:
+- get pods: yes
+- create deployments: yes
+- list namespaces: yes
+NAME                              READY   STATUS    RESTARTS   AGE   IP       NODE     NOMINATED NODE   READINESS GATES
+pod/demo-nginx-598d5f9595-97w5n   0/1     Pending   0          52m   <none>   <none>   <none>           <none>
+pod/web-5bd64f6ccb-6xpzg          0/1     Pending   0          18d   <none>   <none>   <none>           <none>
+
+NAME                     TYPE        CLUSTER-IP      EXTERNAL-IP   PORT(S)   AGE   SELECTOR
+service/demo-nginx-svc   ClusterIP   10.107.157.91   <none>        80/TCP    49m   app=demo-nginx
+service/web              ClusterIP   10.101.59.133   <none>        80/TCP    18d   app=web
+
+NAME                         READY   UP-TO-DATE   AVAILABLE   AGE   CONTAINERS   IMAGES         SELECTOR
+deployment.apps/demo-nginx   0/1     1            0           52m   nginx        nginx:alpine   app=demo-nginx
+deployment.apps/web          0/1     1            0           18d   nginx        nginx:alpine   app=web
+
+NAME                                    DESIRED   CURRENT   READY   AGE   CONTAINERS   IMAGES         SELECTOR
+replicaset.apps/demo-nginx-598d5f9595   1         1         0       52m   nginx        nginx:alpine   app=demo-nginx,pod-template-hash=598d5f9595
+replicaset.apps/web-5bd64f6ccb          1         1         0       18d   nginx        nginx:alpine   app=web,pod-template-hash=5bd64f6ccb
+
+RECENT EVENTS:
+LAST SEEN   TYPE      REASON              OBJECT                             MESSAGE
+52m         Warning   FailedScheduling    pod/demo-nginx-598d5f9595-97w5n    no nodes available to schedule pods
+9m29s       Warning   FailedScheduling    pod/demo-nginx-598d5f9595-97w5n    no nodes available to schedule pods
+9m27s       Warning   FailedScheduling    pod/web-5bd64f6ccb-6xpzg           no nodes available to schedule pods
+52m         Normal    SuccessfulCreate    replicaset/demo-nginx-598d5f9595   Created pod: demo-nginx-598d5f9595-97w5n
+52m         Normal    ScalingReplicaSet   deployment/demo-nginx              Scaled up replica set demo-nginx-598d5f9595 from 0 to 1
+4m37s       Normal    NotTriggerScaleUp   pod/web-5bd64f6ccb-6xpzg           pod didn't trigger scale-up:
+2m27s       Normal    NotTriggerScaleUp   pod/demo-nginx-598d5f9595-97w5n    pod didn't trigger scale-up:
+
+RISK ASSESSMENT:
+- CRITICAL: No worker nodes available.
+- HIGH: Pods stuck in Pending state.
+
+RECOMMENDATIONS:
+• Create or attach a worker node pool so pods can be scheduled.
+• Scheduler failure detected: cluster has no schedulable nodes.
+
+STATUS: ANALYSIS COMPLETE
