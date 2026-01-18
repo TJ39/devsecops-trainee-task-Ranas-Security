@@ -267,3 +267,71 @@ Access to nodes was forbidden but, the most likely root cause is the absence of 
 - Root cause identified
 - Mitigation options documented
 
+## KUBERNETES TASK 2 ROUND UP
+
+# 🛡 KubeSentinel
+
+**KubeSentinel** is a lightweight DevSecOps reconnaissance tool designed to safely map Kubernetes access boundaries, namespace visibility, RBAC permissions, and cluster readiness — without requiring cluster-admin privileges.
+
+It is built for real-world scenarios where engineers receive a kubeconfig and must quickly understand:
+- *Where am I?*
+- *What am I allowed to do?*
+- *Why are workloads not running?*
+
+---
+
+## 🎯 Problem Statement
+
+In restricted Kubernetes environments, engineers often:
+- Have access only to a single namespace
+- Cannot view cluster-wide resources
+- Encounter Pods stuck in `Pending` with little context
+
+Without clarity, this can be misinterpreted as a deployment failure rather than an infrastructure constraint.
+
+---
+
+## 🧠 Solution
+
+KubeSentinel performs **read-only, RBAC-safe checks** to:
+- Identify the active Kubernetes context and user
+- Verify namespace access without hard-failing
+- Probe RBAC permissions using `kubectl auth can-i`
+- Enumerate deployed workloads (if permitted)
+- Detect cluster readiness issues (e.g. zero worker nodes)
+- Collect recent events for forensic insight
+
+The tool **never assumes permissions** and gracefully logs denied access instead of exiting.
+
+---
+
+## 🔍 What KubeSentinel Checks
+
+- Current kubeconfig context & identity
+- Namespace access (granted / denied)
+- RBAC permissions:
+  - get pods
+  - create deployments
+  - get events
+  - list namespaces
+- Deployed resources (Deployments, Pods, Services)
+- Worker node availability
+- Recent Kubernetes events
+
+---
+
+## ⚠️ Example Insight
+
+If a cluster has **zero worker nodes**, KubeSentinel will clearly report:
+
+> Pods will remain Pending even if deployments are applied
+
+This distinguishes **infrastructure readiness issues** from **RBAC or deployment errors**.
+
+---
+
+## 🚀 Usage
+
+```bash
+chmod +x kubesentinel.sh
+./kubesentinel.sh
