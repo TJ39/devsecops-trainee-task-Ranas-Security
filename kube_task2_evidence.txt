@@ -1,0 +1,91 @@
+### kubectl get pods
+--------------------------------
+NAME                           READY   STATUS    RESTARTS   AGE
+demo-nginx-598d5f9595-97w5n    0/1     Pending   0          9d
+minimal-app-5475b4c875-lcgnb   0/1     Pending   0          14m
+web-5bd64f6ccb-6xpzg           0/1     Pending   0          27d
+--------------------------------
+### Created A Service(svc.yaml)-minimal-svc :: kubectl get service
+NAME             TYPE        CLUSTER-IP      EXTERNAL-IP   PORT(S)   AGE
+demo-nginx-svc   ClusterIP   10.107.157.91   <none>        80/TCP    9d
+minimal-svc      ClusterIP   10.100.0.165    <none>        80/TCP    5m13s
+web              ClusterIP   10.101.59.133   <none>        80/TCP    27d
+--------------------------------
+CMD:kubectl -n tafadzwa-dev get deploy,svc,pods -o wide
+NAME                          READY   UP-TO-DATE   AVAILABLE   AGE   CONTAINERS   IMAGES                      SELECTOR
+deployment.apps/demo-nginx    0/1     1            0           9d    nginx        nginx:alpine                app=demo-nginx
+deployment.apps/minimal-app   0/1     1            0           28m   app          registry.k8s.io/pause:3.9   app=minimal
+deployment.apps/web           0/1     1            0           27d   nginx        nginx:alpine                app=web
+
+NAME                     TYPE        CLUSTER-IP      EXTERNAL-IP   PORT(S)   AGE     SELECTOR
+service/demo-nginx-svc   ClusterIP   10.107.157.91   <none>        80/TCP    9d      app=demo-nginx
+service/minimal-svc      ClusterIP   10.100.0.165    <none>        80/TCP    8m53s   app=minimal
+service/web              ClusterIP   10.101.59.133   <none>        80/TCP    27d     app=web
+
+NAME                               READY   STATUS    RESTARTS   AGE   IP       NODE     NOMINATED NODE   READINESS GATES
+pod/demo-nginx-598d5f9595-97w5n    0/1     Pending   0          9d    <none>   <none>   <none>           <none>
+pod/minimal-app-5475b4c875-lcgnb   0/1     Pending   0          28m   <none>   <none>   <none>           <none>
+pod/web-5bd64f6ccb-6xpzg           0/1     Pending   0          27d   <none>   <none>   <none>           <none>
+------------------------------------
+CMD: kubectl -n tafadzwa-dev get events --sort-by=.lastTimestamp | tail -n 80
+LAST SEEN   TYPE      REASON              OBJECT                              MESSAGE
+18m         Warning   FailedScheduling    pod/demo-nginx-598d5f9595-97w5n     no nodes available to schedule pods
+30m         Warning   FailedScheduling    pod/minimal-app-5475b4c875-lcgnb    no nodes available to schedule pods
+18m         Warning   FailedScheduling    pod/minimal-app-5475b4c875-lcgnb    no nodes available to schedule pods
+18m         Warning   FailedScheduling    pod/web-5bd64f6ccb-6xpzg            no nodes available to schedule pods
+30m         Normal    SuccessfulCreate    replicaset/minimal-app-5475b4c875   Created pod: minimal-app-5475b4c875-lcgnb
+30m         Normal    ScalingReplicaSet   deployment/minimal-app              Scaled up replica set minimal-app-5475b4c875 from 0 to 1
+3m8s        Normal    NotTriggerScaleUp   pod/web-5bd64f6ccb-6xpzg            pod didn't trigger scale-up:
+57s         Normal    NotTriggerScaleUp   pod/demo-nginx-598d5f9595-97w5n     pod didn't trigger scale-up:
+37s         Normal    NotTriggerScaleUp   pod/minimal-app-5475b4c875-lcgnb    pod didn't trigger scale-up:
+TESTING NETWORK FROM INSIDE THE CLUSTER
+kubectl run netcheck \
+  --image=registry.k8s.io/busybox:1.36 \
+  --restart=Never \
+  -- sleep 3600
+pod created sucessfully
+-------------------------------
+CMD: kubectl exec -it netcheck -- sh
+----------------------------------------------
+-Pod netcheck does not have a host assigned
+CMD: kubectl describe pod netcheck -n tafadzwa-dev
+Name:             netcheck
+Namespace:        tafadzwa-dev
+Priority:         0
+Service Account:  default
+Node:             <none>
+Labels:           run=netcheck
+Annotations:      <none>
+Status:           Pending
+IP:               
+IPs:              <none>
+Containers:
+  netcheck:
+    Image:      registry.k8s.io/busybox:1.36
+    Port:       <none>
+    Host Port:  <none>
+    Args:
+      sleep
+      3600
+    Environment:  <none>
+    Mounts:
+      /var/run/secrets/kubernetes.io/serviceaccount from kube-api-access-sb8r8 (ro)
+Conditions:
+  Type           Status
+  PodScheduled   False 
+Volumes:
+  kube-api-access-sb8r8:
+    Type:                    Projected (a volume that contains injected data from multiple sources)
+    TokenExpirationSeconds:  3607
+    ConfigMapName:           kube-root-ca.crt
+    Optional:                false
+    DownwardAPI:             true
+QoS Class:                   BestEffort
+Node-Selectors:              <none>
+Tolerations:                 node.kubernetes.io/not-ready:NoExecute op=Exists for 300s
+                             node.kubernetes.io/unreachable:NoExecute op=Exists for 300s
+Events:
+  Type     Reason             Age                    From                Message
+  ----     ------             ----                   ----                -------
+  Warning  FailedScheduling   13m (x863 over 171m)   default-scheduler   no nodes available to schedule pods
+  Normal   NotTriggerScaleUp  56s (x1021 over 171m)  cluster-autoscaler  pod didn't trigger scale-up:

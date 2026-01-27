@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: minimal-svc
+  namespace: tafadzwa-dev
+spec:
+  type: ClusterIP
+  selector:
+    app: minimal
+  ports:
+    - port: 80
+      targetPort: 80

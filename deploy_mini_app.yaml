@@ -1,0 +1,18 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: minimal-app
+  namespace: tafadzwa-dev
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: minimal
+  template:
+    metadata:
+      labels:
+        app: minimal
+    spec:
+      containers:
+      - name: app
+        image: registry.k8s.io/pause:3.9
